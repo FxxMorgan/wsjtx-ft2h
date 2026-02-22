@@ -118,6 +118,9 @@ extern "C" {
   void genft4_(char* msg, int* ichk, char* msgsent, char ft4msgbits[], int itone[],
                fortran_charlen_t, fortran_charlen_t);
 
+  void genft2h_(char* msg, int* ichk, char* msgsent, char ft2hmsgbits[], int itone[],
+               int* isshort, fortran_charlen_t, fortran_charlen_t);
+
   void genfst4_(char* msg, int* ichk, char* msgsent, char fst4msgbits[],
                  int itone[], int* iwspr, fortran_charlen_t, fortran_charlen_t);
 
@@ -126,6 +129,9 @@ extern "C" {
 
   void gen_ft4wave_(int itone[], int* nsym, int* nsps, float* fsample, float* f0,
                     float xjunk[], float wave[], int* icmplx, int* nwave);
+
+  void gen_ft2h_wave_(int itone[], int* nsym, int* nsps, float* fsample, float* f0,
+                      float xjunk[], float wave[], int* icmplx, int* nwave);
 
   void gen_fst4wave_(int itone[], int* nsym, int* nsps, int* nwave, float* fsample,
                        int* hmod, float* f0, int* icmplx, float xjunk[], float wave[]);
@@ -637,6 +643,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   ui->actionFST4->setActionGroup(modeGroup);
   ui->actionFST4W->setActionGroup(modeGroup);
   ui->actionFT4->setActionGroup(modeGroup);
+  ui->actionFT2H->setActionGroup(modeGroup);
   ui->actionFT8->setActionGroup(modeGroup);
   ui->actionJT9->setActionGroup(modeGroup);
   ui->actionJT65->setActionGroup(modeGroup);
@@ -1899,6 +1906,7 @@ void MainWindow::dataSink(qint64 frames)
       }
       int samples=m_TRperiod*12000;
       if(m_mode=="FT4") samples=21*3456;
+      if(m_mode=="FT2H") samples=48000;   // 4.0 s × 12000 S/s
 
       // the following is potential a threading hazard - not a good
       // idea to pass pointer to be processed in another thread
@@ -2900,6 +2908,8 @@ void MainWindow::setup_status_bar (bool vhf)
     mode_label.setStyleSheet ("QLabel{color: #000000; background-color: #ff6666}");
   } else if ("FT4" == m_mode) {
     mode_label.setStyleSheet ("QLabel{color: #000000; background-color: #ff0099}");
+  } else if ("FT2H" == m_mode) {
+    mode_label.setStyleSheet ("QLabel{color: #ffffff; background-color: #0066cc}");
   } else if ("FT8" == m_mode) {
     mode_label.setStyleSheet ("QLabel{color: #000000; background-color: #ff6699}");
   } else if ("FST4" == m_mode) {
@@ -3776,6 +3786,10 @@ void MainWindow::decode()                                       //decode()
   if(m_mode=="FT8") dec_data.params.napwid=50;
   if(m_mode=="FT4") {
     dec_data.params.nmode=5;
+    m_BestCQpriority="";
+  }
+  if(m_mode=="FT2H") {
+    dec_data.params.nmode=25;
     m_BestCQpriority="";
   }
   if(m_mode=="FST4") dec_data.params.nmode=240;
@@ -5312,6 +5326,26 @@ void MainWindow::guiUpdate()
           int icmplx=0;
           gen_ft4wave_(const_cast<int *>(itone),&nsym,&nsps,&fsample,&f0,foxcom_.wave,
                        foxcom_.wave,&icmplx,&nwave);
+        }
+        if(m_mode=="FT2H") {
+          int ichk=0;
+          char ft2hmsgbits[77];
+          int isshort=0;
+          // Detect short messages (RR73, 73, RRR)
+          QString msgStr = QString::fromLatin1(message, 37).trimmed().toUpper();
+          if(msgStr == "RR73" || msgStr == "73" || msgStr == "RRR") {
+            isshort=1;
+          }
+          genft2h_(message, &ichk, msgsent, const_cast<char *>(ft2hmsgbits),
+                   const_cast<int *>(itone), &isshort, (FCL)37, (FCL)37);
+          int nsym = isshort ? 30 : 74;    // NN_S or NN (without ramp)
+          int nsps=4*576;                   // 48kHz upsampled
+          float fsample=48000.0;
+          float f0=ui->TxFreqSpinBox->value() - m_XIT;
+          int nwave=(nsym+2)*nsps;
+          int icmplx=0;
+          gen_ft2h_wave_(const_cast<int *>(itone),&nsym,&nsps,&fsample,&f0,foxcom_.wave,
+                         foxcom_.wave,&icmplx,&nwave);
         }
         if(m_mode=="FST4" or m_mode=="FST4W") {
           int ichk=0;
@@ -7622,6 +7656,58 @@ void MainWindow::on_actionFT4_triggered()
   ui->txb6->setEnabled(true);
   ui->txFirstCheckBox->setEnabled(true);
   chkFT4();
+  statusChanged();
+}
+
+void MainWindow::on_actionFT2H_triggered()
+{
+  QTimer::singleShot (50, [=] {
+    ui->TxFreqSpinBox->setValue(m_settings->value("TxFreq_old",1500).toInt());
+    ui->RxFreqSpinBox->setValue(m_settings->value("RxFreq_old",1500).toInt());
+    on_sbSubmode_valueChanged(ui->sbSubmode->value());
+  });
+  m_mode="FT2H";
+  if(m_specOp==SpecOp::HOUND) {
+    m_config.setSpecial_None();
+    m_specOp=m_config.special_op_id();
+  }
+  m_TRperiod=4.0;                      // 4.0 s T/R cycle for standard frames
+  bool bVHF=m_config.enable_VHF_features();
+  m_bFast9=false;
+  m_bFastMode=false;
+  WSPR_config(false);
+  switch_mode (Modes::FT2H);
+  m_nsps=6912;                          // Display FFT size
+  m_FFTSize = m_nsps/2;
+  Q_EMIT FFTSize (m_FFTSize);
+  m_hsymStop=14;                        // When to trigger decode
+  setup_status_bar (bVHF);
+  m_toneSpacing=12000.0/576.0;          // 20.833 Hz tone spacing
+  ui->actionFT2H->setChecked(true);
+  m_wideGraph->setMode(m_mode);
+  m_send_RR73=true;
+  VHF_features_enabled(bVHF);
+  ui->cbAutoSeq->setChecked(true);
+  m_fastGraph->hide();
+  m_wideGraph->show();
+  ui->rh_decodes_headings_label->setText("  UTC   dB   DT Freq    " + tr ("Message"));
+  m_wideGraph->setPeriod(m_TRperiod,m_nsps);
+  m_modulator->setTRPeriod(m_TRperiod);
+  m_detector->setTRPeriod(m_TRperiod);
+  ui->rh_decodes_title_label->setText(tr ("Rx Frequency"));
+  ui->lh_decodes_title_label->setText(tr ("Band Activity"));
+  ui->lh_decodes_headings_label->setText( "  UTC   dB   DT Freq    " + tr ("Message"));
+  displayWidgets(nWidgets("11101000010011100001000000011000100000"));
+  ui->txrb2->setEnabled(true);
+  ui->txrb4->setEnabled(true);
+  ui->txrb5->setEnabled(true);
+  ui->txrb6->setEnabled(true);
+  ui->txb2->setEnabled(true);
+  ui->txb4->setEnabled(true);
+  ui->txb5->setEnabled(true);
+  ui->txb6->setEnabled(true);
+  ui->txFirstCheckBox->setEnabled(true);
+  chkFT2H();
   statusChanged();
 }
 
@@ -11482,6 +11568,16 @@ void MainWindow::chkFT4()
 
 }
 
+void MainWindow::chkFT2H()
+{
+  if(m_mode!="FT2H") return;
+  ui->cbAutoSeq->setEnabled(true);
+  ui->respondComboBox->setVisible(true);
+  ui->respondComboBox->setEnabled(true);
+  ui->labDXped->setVisible(false);
+  ui->respondComboBox->setVisible(ui->cbAutoSeq->isChecked());
+}
+
 void MainWindow::on_pbBestSP_clicked()
 {
   m_bBestSPArmed = !m_bBestSPArmed;
@@ -11493,6 +11589,7 @@ void MainWindow::on_pbBestSP_clicked()
 void MainWindow::set_mode (QString const& mode)
 {
     if ("FT4" == mode) on_actionFT4_triggered ();
+    else if ("FT2H" == mode) on_actionFT2H_triggered ();
     else if ("FST4" == mode) on_actionFST4_triggered ();
     else if ("FST4W" == mode) on_actionFST4W_triggered ();
     else if ("FT8" == mode) on_actionFT8_triggered ();
@@ -11660,6 +11757,11 @@ void MainWindow::on_ft8Button_clicked()
 void MainWindow::on_ft4Button_clicked()
 {
   on_actionFT4_triggered();
+}
+
+void MainWindow::on_ft2hButton_clicked()
+{
+  on_actionFT2H_triggered();
 }
 
 void MainWindow::on_msk144Button_clicked()

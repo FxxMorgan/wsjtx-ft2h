@@ -3003,6 +3003,28 @@ QLabel[oob=&quot;true&quot;] {
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="ft2hButton">
+             <property name="minimumSize">
+              <size>
+               <width>32</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>Switch to FT2H hybrid mode</string>
+             </property>
+             <property name="text">
+              <string>FT2H</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="msk144Button">
              <property name="minimumSize">
               <size>
@@ -3314,6 +3336,7 @@ QPushButton[state=&quot;ok&quot;] {
     </property>
     <addaction name="actionFST4"/>
     <addaction name="actionFT4"/>
+    <addaction name="actionFT2H"/>
     <addaction name="actionFT8"/>
     <addaction name="actionJT4"/>
     <addaction name="actionJT9"/>
@@ -3779,6 +3802,14 @@ QPushButton[state=&quot;ok&quot;] {
    </property>
    <property name="text">
     <string>FT4</string>
+   </property>
+  </action>
+  <action name="actionFT2H">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>FT2H</string>
    </property>
   </action>
   <action name="actionFST4">

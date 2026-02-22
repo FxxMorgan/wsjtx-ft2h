@@ -18,6 +18,13 @@ __pycache__
 cmake-build-debug
 cmake-build-release
 CMakeFiles
+build/
+release/
+run_cmake*.sh
+run_build*.sh
+build_cmake*.sh
+build_config.sh
+cc1_*.txt
 fnd
 lib/77bit/tmp
 lib/tmp

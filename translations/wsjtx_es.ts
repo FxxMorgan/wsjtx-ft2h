@@ -4198,6 +4198,17 @@ predefinida. La lista se puede modificar en &quot;Ajustes&quot; (F2).</translati
         <translation>FT4</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.ui" line="3020"/>
+        <source>Switch to FT2H hybrid mode</source>
+        <translation>Cambiar al modo híbrido FT2H</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.ui" line="3023"/>
+        <location filename="../widgets/mainwindow.ui" line="3812"/>
+        <source>FT2H</source>
+        <translation>FT2H</translation>
+    </message>
+    <message>
         <location filename="../widgets/mainwindow.cpp" line="258"/>
         <source>Rig Control Error</source>
         <translation>Error de control del equipo</translation>

@@ -56,6 +56,8 @@
 #define NUM_FT8_SYMBOLS 79
 #define NUM_SUPERFOX_SYMBOLS 153         //24 sync + 127 data + 2 ramp up/down
 #define NUM_FT4_SYMBOLS 105
+#define NUM_FT2H_SYMBOLS 76
+#define NUM_FT2H_SHORT_SYMBOLS 32
 #define NUM_FST4_SYMBOLS 160             //240/2 data + 5*8 sync
 #define NUM_CW_SYMBOLS 250
 #define MAX_NUM_SYMBOLS 250
@@ -155,6 +157,7 @@ private slots:
   void on_houndButton_clicked(bool checked);
   void on_ft8Button_clicked();
   void on_ft4Button_clicked();
+  void on_ft2hButton_clicked();
   void on_msk144Button_clicked();
   void on_q65Button_clicked();
   void on_jt65Button_clicked();
@@ -232,6 +235,7 @@ private slots:
   void on_actionJT65_triggered();
   void on_actionJT4_triggered();
   void on_actionFT4_triggered();
+  void on_actionFT2H_triggered();
   void on_actionFT8_triggered();
   void on_actionFST4_triggered();
   void on_actionFST4W_triggered();
@@ -393,6 +397,7 @@ private:
   void foxTest();
   void setColorHighlighting();
   void chkFT4();
+  void chkFT2H();
   bool elide_tx1_not_allowed () const;
   void readWidebandDecodes();
   void configActiveStations();

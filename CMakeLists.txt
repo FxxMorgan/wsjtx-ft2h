@@ -326,6 +326,8 @@ if (WIN32)
     )
 endif (WIN32)
 
+# OmniRig removal moved to after dumpcpp check (line ~885)
+
 set (wsjt_FSRCS
   # put module sources first in the hope that they get rebuilt before use
   lib/types.f90
@@ -341,6 +343,7 @@ set (wsjt_FSRCS
   lib/jt65_mod.f90
   lib/ft8_decode.f90
   lib/ft4_decode.f90
+  lib/ft2h_decode.f90
   lib/fst4_decode.f90
   lib/get_q3list.f90
   lib/jt9_decode.f90
@@ -463,6 +466,10 @@ set (wsjt_FSRCS
   lib/ft4/ft4code.f90
   lib/ft4/genft4.f90
   lib/ft4/gen_ft4wave.f90
+  lib/ft2h/genft2h.f90
+  lib/ft2h/gen_ft2h_wave.f90
+  lib/ft2h/ldpc_64_32.f90
+  lib/ft2h/unpack_ft2h_short.f90
   lib/ft8/gen_ft8wave.f90
   lib/ft8/genft8refsig.f90
   lib/genwspr.f90
@@ -556,6 +563,7 @@ set (wsjt_FSRCS
   lib/subtract65.f90
   lib/ft8/subtractft8.f90
   lib/ft4/subtractft4.f90
+  lib/ft2h/subtractft2h.f90
   lib/sun.f90
   lib/symspec.f90
   lib/symspec2.f90
@@ -564,6 +572,10 @@ set (wsjt_FSRCS
   lib/sync65.f90
   lib/ft4/getcandidates4.f90
   lib/ft4/get_ft4_bitmetrics.f90
+  lib/ft2h/ft2h_getcandidates.f90
+  lib/ft2h/ft2h_get_bitmetrics.f90
+  lib/ft2h/ft2h_downsample.f90
+  lib/ft2h/sync_ft2h.f90
   lib/ft8/sync8.f90
   lib/ft8/sync8d.f90
   lib/ft4/sync4d.f90
@@ -845,23 +857,33 @@ set_property (SOURCE ${all_C_and_CXXSRCS} APPEND PROPERTY OBJECT_DEPENDS ${CMAKE
 
 if (WIN32)
   # generate the OmniRig COM interface source
-  find_program (DUMPCPP dumpcpp)
+  find_program (DUMPCPP dumpcpp dumpcpp-qt5)
   if (DUMPCPP-NOTFOUND)
-    message (FATAL_ERROR "dumpcpp tool not found")
-  endif (DUMPCPP-NOTFOUND)
-  execute_process (
-    COMMAND ${DUMPCPP} -getfile {4FE359C5-A58F-459D-BE95-CA559FB4F270}
-    OUTPUT_VARIABLE AXSERVER
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-  string (STRIP "${AXSERVER}" AXSERVER)
-  if (NOT AXSERVER)
-    message (FATAL_ERROR "You need to install OmniRig on this computer")
-  endif (NOT AXSERVER)
-  string (REPLACE "\"" "" AXSERVER ${AXSERVER})
-  file (TO_CMAKE_PATH ${AXSERVER} AXSERVERSRCS)
+    message (WARNING "dumpcpp tool not found - OmniRig support disabled")
+    set (WSJT_SKIP_OMNIRIG ON)
+  else ()
+    execute_process (
+      COMMAND ${DUMPCPP} -getfile {4FE359C5-A58F-459D-BE95-CA559FB4F270}
+      OUTPUT_VARIABLE AXSERVER
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+    string (STRIP "${AXSERVER}" AXSERVER)
+    if (NOT AXSERVER)
+      message (WARNING "OmniRig not installed - OmniRig support disabled")
+      set (WSJT_SKIP_OMNIRIG ON)
+    else ()
+      string (REPLACE "\"" "" AXSERVER ${AXSERVER})
+      file (TO_CMAKE_PATH ${AXSERVER} AXSERVERSRCS)
+      set (WSJT_SKIP_OMNIRIG OFF)
+    endif ()
+  endif ()
 endif ()
 
+if (WSJT_SKIP_OMNIRIG)
+  list (REMOVE_ITEM wsjt_qt_CXXSRCS Transceiver/OmniRigTransceiver.cpp)
+  add_definitions(-DWSJT_SKIP_OMNIRIG)
+  message (STATUS "OmniRig support disabled - removed OmniRigTransceiver.cpp")
+endif ()
 
 #
 # decide on platform specifc packing and fixing up
@@ -1072,7 +1094,8 @@ endif (NOT APPLE)
 #
 
 include (FortranCInterface)
-FortranCInterface_VERIFY (CXX)
+# Skip verification - known issue with MSYS2 cmake + MinGW compilers
+# FortranCInterface_VERIFY (CXX)
 FortranCInterface_HEADER (FC.h MACRO_NAMESPACE "FC_" SYMBOL_NAMESPACE "FC_"
   SYMBOLS
   grayline
@@ -1417,10 +1440,10 @@ qt5_add_resources (wsjtx_RESOURCES_RCC
   )
 
 # AX COM servers
-if (WIN32)
+if (WIN32 AND NOT WSJT_SKIP_OMNIRIG)
   include (QtAxMacros)
   wrap_ax_server (GENAXSRCS ${AXSERVERSRCS})
-endif (WIN32)
+endif ()
 
 #
 # targets dependent on Qt
@@ -1499,7 +1522,7 @@ endif (${OPENMP_FOUND} OR APPLE)
 
 if (WIN32)
   find_package (Portaudio REQUIRED)
-  add_subdirectory (map65)
+  # add_subdirectory (map65)  # Disabled - not needed for FT2H build
 endif ()
   add_subdirectory (qmap)
 
