@@ -71,6 +71,7 @@ namespace
       {1839000, Modes::JT9, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {1839000, Modes::FST4, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {1840000, Modes::FT8, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
+      {1842000, Modes::FT2H, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
 
       // Band plans (all USB dial unless stated otherwise)
       //
@@ -102,6 +103,7 @@ namespace
       {3570000, Modes::JT65, IARURegions::ALL, "","", QDateTime(), QDateTime(), false}, // JA compatible
       {3572000, Modes::JT9, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {3573000, Modes::FT8, IARURegions::ALL, "","", QDateTime(), QDateTime(), false}, // above as below JT65 is out of DM allocation
+      {3578000, Modes::FT2H, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {3568600, Modes::WSPR, IARURegions::ALL, "","", QDateTime(), QDateTime(), false}, // needs guard marker and lock out
       {3575000, Modes::FT4, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},  // provisional
       {3568000, Modes::FT4, IARURegions::R3, "","", QDateTime(), QDateTime(), false},   // provisional
@@ -139,6 +141,7 @@ namespace
       //
       {7038600, Modes::WSPR, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {7074000, Modes::FT8, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
+      {7079000, Modes::FT2H, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {7076000, Modes::JT65, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {7078000, Modes::JT9, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {7047500, Modes::FT4, IARURegions::ALL, "","", QDateTime(), QDateTime(), false}, // provisional - moved
@@ -172,6 +175,7 @@ namespace
       //     10143.25       OLIVIA, Contestia, etc. (main QRG)
       //
       {10136000, Modes::FT8, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
+      {10141000, Modes::FT2H, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {10138000, Modes::JT65, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {10138700, Modes::WSPR, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {10140000, Modes::JT9, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
@@ -204,7 +208,7 @@ namespace
       //     14105.5            OLIVIA 1000
       //     14106.5            OLIVIA 1000 (main QRG)
       //
-      // R3: 14070 - 14112 DM NB(<2000Hz) with ±500Hz IBP guard band at 14100
+      // R3: 14070 - 14112 DM NB(<2000Hz) with ï¿½500Hz IBP guard band at 14100
       //
       //     14070              PSK31
       //     14074.4            OLIVIA, Contestia, etc.
@@ -216,6 +220,7 @@ namespace
       // 
       {14095600, Modes::WSPR, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {14074000, Modes::FT8, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
+      {14079000, Modes::FT2H, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {14076000, Modes::JT65, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {14078000, Modes::JT9, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {14080000, Modes::FT4, IARURegions::ALL, "","", QDateTime(), QDateTime(), false}, // provisional
@@ -240,7 +245,7 @@ namespace
       //     18105   - 18110    Packet
       //     18110              NCDXF beacons
       //
-      // R3: 18095 - 18120 DM NB(<2000Hz) with ±500Hz IBP guard band at 18110
+      // R3: 18095 - 18120 DM NB(<2000Hz) with ï¿½500Hz IBP guard band at 18110
       //
       //     18100              PSK31
       //     18103.4            OLIVIA, Contestia, etc. (main QRG)
@@ -248,24 +253,28 @@ namespace
       //     18110              NCDXF beacons
       //
       {18100000, Modes::FT8, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
+      {18105000, Modes::FT2H, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {18102000, Modes::JT65, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {18104000, Modes::JT9, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {18104000, Modes::FT4, IARURegions::ALL, "","", QDateTime(), QDateTime(), false}, // provisional
       {18104600, Modes::WSPR, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
 
       {21074000, Modes::FT8, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
+      {21079000, Modes::FT2H, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {21076000, Modes::JT65, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {21078000, Modes::JT9, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {21094600, Modes::WSPR, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {21140000, Modes::FT4, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
 
       {24915000, Modes::FT8, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
+      {24920000, Modes::FT2H, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {24917000, Modes::JT65, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {24919000, Modes::JT9, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {24919000, Modes::FT4, IARURegions::ALL, "","", QDateTime(), QDateTime(), false}, // provisional
       {24924600, Modes::WSPR, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
 
       {28074000, Modes::FT8, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
+      {28079000, Modes::FT2H, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {28076000, Modes::JT65, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {28078000, Modes::JT9, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {28124600, Modes::WSPR, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
